@@ -7,14 +7,13 @@ Import-Module ActiveDirectory
 
 function Get-ADUsersLastLogon() {
     $dcs = Get-ADDomainController -Filter {Name -like "*"}
-    $user = Get-ADUser -Identity $username
     $MyArrayList = New-Object -TypeName "System.Collections.ArrayList"
 
     foreach($dc in $dcs) {
         $time = 0
         $hostname = $dc.HostName
         if (Test-Connection -Computer $hostname -Count 2 -Quiet) {
-            $currentUser = Get-ADUser $user.SamAccountName | Get-ADObject -Server $hostname -Properties lastLogon
+            $currentUser = Get-ADUser -Identity $username -Server $hostname -Properties Name, LastLogon, LockedOut
             if($currentUser.LastLogon -gt $time){
                 $time = $currentUser.LastLogon
                 $dt = [DateTime]::FromFileTime($time)
@@ -27,8 +26,9 @@ function Get-ADUsersLastLogon() {
         }
         $row = [PSCustomObject]@{
                                 Host = $hostname;
-                                User = $user.Name;
-                                LastLogon = $lastLogon
+                                User = $currentUser.Name;
+                                LastLogon = $lastLogon;
+                                Locked = $currentUser.LockedOut
                                 }
         $MyArrayList += $row
         $row
