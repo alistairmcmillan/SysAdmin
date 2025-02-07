@@ -16,7 +16,7 @@ function Get-ADUsersLastLogon() {
             $currentUser = Get-ADUser -Identity $username -Server $hostname -Properties Name, LastLogon, LockedOut
             if($currentUser.LastLogon -gt $time){
                 $time = $currentUser.LastLogon
-                $dt = [DateTime]::FromFileTime($time)
+                $dt = [DateTime]::FromFileTime($time).ToString("dd MMM yyyy")
                 $lastLogon = $dt
             } else {
                 $lastLogon = $time
